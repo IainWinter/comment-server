@@ -30,7 +30,7 @@ def init_tables():
 	query_direct('''
 		CREATE TABLE IF NOT EXISTS subjects (
 			id            INTEGER     PRIMARY KEY AUTOINCREMENT,
-			name          VARCHAR(64) NOT NULL,
+			name          VARCHAR(64) NOT NULL UNIQUE,
 			test_question VARCHAR(64) NOT NULL,
 			test_answer   VARCHAR(64) NOT NULL
        );
@@ -49,7 +49,7 @@ def init_tables():
 	db_commit()
 
 def create_subject(subject_name: str, test_question: str, test_answer: str):
-	query("INSERT INTO subjects (name, test_question, test_answer) VALUES (?, ?, ?)", (subject_name, test_question, test_answer))
+	query("INSERT OR IGNORE INTO subjects (name, test_question, test_answer) VALUES (?, ?, ?)", (subject_name, test_question, test_answer))
 	db_commit()
 
 def subject_or_answer_is_invalid(subject_id: int, test_answer: str):

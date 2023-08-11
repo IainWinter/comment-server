@@ -95,3 +95,8 @@ def get_comments_for_subject(connection_ip: str, subject_name: str):
 	subject = subject_get_info(subject_id)
 
 	return { "status": "success", "comments": comments, "subject": subject }
+
+# this is for debug
+def get_all_subjects():
+	subjects = query("SELECT * FROM subjects", ())
+	return { "return": subjects }
