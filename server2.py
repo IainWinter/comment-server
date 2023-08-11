@@ -30,13 +30,19 @@ def comment_post(subject, parent):
 	name = request.args.get('name')
 	content = request.args.get('content')
 
+	if not test or not name or not content:
+		return send_json({"error": "invalid"})
+
 	return send_json(try_post_comment(ip, subject, test, parent, name, content))
 
 @app.route("/comment-edit/<edit_key>")
 def comment_edit(edit_key):
 	ip = get_ip(request)
 	name = request.args.get('name')
-	content = request.args.get('name')
+	content = request.args.get('content')
+
+	if not name or not content:
+		return send_json({"error": "invalid"})
 
 	return send_json(try_edit_comment(ip, edit_key, name, content))
 
