@@ -23,14 +23,21 @@ def comment_get(subject):
 	ip = get_ip(request)
 	return send_json(get_comments_for_subject(ip, subject))
 
-@app.route("/comment-post/<subject>/<test>/<parent>/<name>/<content>")
-def comment_post(subject, test, parent, name, content):
+@app.route("/comment-post/<subject>/<parent>")
+def comment_post(subject, parent):
 	ip = get_ip(request)
+	test = request.args.get('test')
+	name = request.args.get('name')
+	content = request.args.get('content')
+
 	return send_json(try_post_comment(ip, subject, test, parent, name, content))
 
-@app.route("/comment-edit/<edit_key>/<name>/<content>")
-def comment_edit(edit_key, name, content):
+@app.route("/comment-edit/<edit_key>")
+def comment_edit(edit_key):
 	ip = get_ip(request)
+	name = request.args.get('name')
+	content = request.args.get('name')
+
 	return send_json(try_edit_comment(ip, edit_key, name, content))
 
 @app.route("/comment-delete/<edit_key>")
