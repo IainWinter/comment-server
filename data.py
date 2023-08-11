@@ -74,7 +74,7 @@ def comment_delete(edit_key: str):
 	db_commit()
 
 def comment_get_all_not_deletd_for_subject(subject_id: int):
-	return query("SELECT id, parent_id, creation_time, name, content, strftime('%s', creation_time) - strftime('%s', datetime('now', '-15 minutes')) AS edit_time_left FROM comments WHERE subject_id = ? AND is_deleted = FALSE", (subject_id, ))
+	return query("SELECT id, parent_id, creation_time, name, content, MAX(0, strftime('%s', creation_time) - strftime('%s', datetime('now', '-15 minutes'))) AS edit_time_left FROM comments WHERE subject_id = ? AND is_deleted = FALSE", (subject_id, ))
 
 def subject_get_info(subject_id: int):
 	return query_get("SELECT name, test_question FROM subjects WHERE id = ?", (subject_id, ))
