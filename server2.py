@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from logic import *
-from data import db_close
+from data import init_tables, create_subject, db_close
 
 app = Flask(__name__)
 
@@ -56,10 +56,6 @@ def comment_edit(edit_key):
 def comment_delete(edit_key):
 	ip = get_ip(request)
 	return send_json(try_delete_comment(ip, edit_key))
-
-@app.route("/comment-subjects")
-def comment_subjects():
-	return send_json(get_all_subjects())
 
 @app.teardown_appcontext
 def close_connection(exception):
