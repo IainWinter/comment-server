@@ -10,7 +10,7 @@ with app.app_context():
 	create_subject("epa-algorithm", "Which direction of normal was calculated in EPA.js? (right or left)", "right")
 	create_subject("gjk-algorithm", "What is the 3D case of the GJK algorithm called?", "tetrahedron")
 	create_subject("falling-sand", "What is the RGB color of _SAND in sketch.pde? (R, G, B)", "255,150,50")
-	create_subject("falling-sand-worlds", "What is the final typename, without namespace, of the map used for m_chunkLookup?", "concurrent_unordered_map")
+	create_subject("falling-sand-worlds", "What is the hex number used in pair_hash.h?", "0x1f1f1f1f")
 	create_subject("physics-engine", "What is the name of the class which fixes stuttery movment?", "physicssmoothstepsystem")
 	create_subject("another-way", "What was the file name used for the example code?", "typeerasurecopy.h")
 	create_subject("support", "What is the domain of this website?", "winter.dev")
