@@ -7,9 +7,9 @@ app = Flask(__name__)
 # This gets ran everytime the file is saved, so all queries need to INSERT OR IGNORE
 with app.app_context():
 	init_tables()
-	create_subject("epa-algorithm", "Which direction of normal was calculated in EPA.js? (right or left)", "right")
+	create_subject("epa-algorithm", "Which direction of normal was calculated in EPA.js?", "right")
 	create_subject("gjk-algorithm", "What is the 3D case of the GJK algorithm called?", "tetrahedron")
-	create_subject("falling-sand", "What is the RGB color of _SAND in sketch.pde? (R, G, B)", "255,150,50")
+	create_subject("falling-sand", "What is the R, G, B color of _SAND in sketch.pde?", "255,150,50")
 	create_subject("falling-sand-worlds", "What is the hex number used in pair_hash.h?", "0x1f1f1f1f")
 	create_subject("physics-engine", "What is the name of the class which fixes stuttery movment?", "physicssmoothstepsystem")
 	create_subject("another-way", "What was the file name used for the example code?", "typeerasurecopy.h")
