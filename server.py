@@ -1,67 +1,73 @@
-import http.server
-import json
-
-from url import URLParams
+from flask import Flask, request, jsonify
 from logic import *
+from data import init_tables, create_subject, db_close
 
-HOST = "localhost"
-PORT = 8801
+app = Flask(__name__)
 
-api = {
-	"/comment-post":   [ try_post_comment,         ["subject", "test", "parent", "name", "content"] ],
-	"/comment-edit":   [ try_edit_comment,         ["edit_key", "name", "content"] ],
-	"/comment-delete": [ try_delete_comment,       ["edit_key"] ],
-	"/comment-get":    [ get_comments_for_subject, ["subject"] ]
-}
-
-class DevWinterCommentsServer(http.server.SimpleHTTPRequestHandler):
-	def return_json(self, jsonObject):
-		self.send_response(200)
-		self.send_header('Content-type', 'application/json')
-		self.send_header('Access-Control-Allow-Origin', '*')   # only temp
-		self.end_headers()
-		self.wfile.write(bytes(json.dumps(jsonObject), 'utf-8'))
-        
-	def do_GET(self):
-		url = URLParams(self.path)
-		connection_ip = self.client_address[0]
-
-		json_response = { "status": "error" }
-
-		# Create a new string with the url path, without the trailing slash
-		# This is done to make sure that the url path is in the api dictionary
-		# even if the user enters the url with a trailing slash
-
-		api_path = url.path
-		if api_path.endswith("/"):
-			api_path = api_path[:-1]
-
-		if api_path in api:
-			action, action_params = api[api_path]
-			if url.has_all(action_params):
-				try:
-					json_response = action(connection_ip, *[url.get_string(param) for param in action_params])
-				except Exception:
-					pass # default response is error
-
-		return self.return_json(json_response)
-
-webServer = http.server.HTTPServer((HOST, PORT), DevWinterCommentsServer)
-
-try:
-	print("Starting server...")
-
-	print("Creating database...")
-	init_database_connection("data.db")
+# This gets ran every time the file is saved, so all queries need to INSERT OR IGNORE
+with app.app_context():
 	init_tables()
+	create_subject("epa-algorithm", "Which direction of normal was calculated in EPA.js?", "right")
+	create_subject("gjk-algorithm", "What is the 3D case of the GJK algorithm called?", "tetrahedron")
+	create_subject("falling-sand", "What is the R, G, B color of _SAND in sketch.pde?", "255,150,50")
+	create_subject("falling-sand-worlds", "What is the hex number used in pair_hash.h?", "0x1f1f1f1f")
+	create_subject("physics-engine", "What is the name of the class which fixes stuttery movement?", "physicssmoothstepsystem")
+	create_subject("another-way", "What was the file name used for the example code?", "typeerasurecopy.h")
+	create_subject("support", "What is the domain of this website?", "winter.dev")
 
-	# should disable
-	print("Creating test subject...")
-	create_subject("epa-algorithm", "What is the answer to life, the universe and everything?", "42")
+def send_json(obj):
+	response = jsonify(obj)
+	response.headers.add('Access-Control-Allow-Origin', '*')
+	return response
 
-	print("Server started http://%s:%s" % (HOST, PORT))
-	webServer.serve_forever()
+def get_ip(request) -> str:
+	# for reverse proxy pass
+	return request.headers.get('X-Real-IP', request.remote_addr)
 
-except KeyboardInterrupt:
-	webServer.server_close()
-	print("The server is stopped.")
+@app.route("/comment-get/<subject>")
+def comment_get(subject):
+	ip = get_ip(request)
+	return send_json(get_comments_for_subject(ip, subject))
+
+@app.route("/comment-post/<subject>/<parent>")
+def comment_post(subject, parent):
+	ip = get_ip(request)
+	test = request.args.get('test')
+	name = request.args.get('name')
+	content = request.args.get('content')
+
+	if not test or not name or not content:
+		return send_json({"error": "invalid"})
+
+	return send_json(try_post_comment(ip, subject, test, parent, name, content))
+
+@app.route("/comment-edit/<edit_key>")
+def comment_edit(edit_key):
+	ip = get_ip(request)
+	name = request.args.get('name')
+	content = request.args.get('content')
+
+	if not name or not content:
+		return send_json({"error": "invalid"})
+
+	return send_json(try_edit_comment(ip, edit_key, name, content))
+
+@app.route("/comment-delete/<edit_key>")
+def comment_delete(edit_key):
+	ip = get_ip(request)
+	return send_json(try_delete_comment(ip, edit_key))
+
+@app.errorhandler(404)
+def page_not_found(e):
+	with open('./log.txt', 'a') as file:
+		file.write(request.url + '\n')
+	return "404"
+
+@app.teardown_appcontext
+def close_connection(exception):
+	db_close()
+
+# Only if server is running through cli
+if __name__ == '__main__':
+	print("Starting server...")
+	app.run(debug=True, use_reloader=False, port=80)
